@@ -26,7 +26,7 @@ Run the powershell script in the root of this repository:
 
 ```bash
 # From WSL
-powershell.exe .../run.ps1
+powershell.exe "& .../run.ps1"
 ```
 
 ```powershell
