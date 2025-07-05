@@ -4,7 +4,7 @@ import pyaudio
 import time
 
 FORMAT = pyaudio.paInt16
-CHUNK = 512
+CHUNK = 1024
 RATE = 44100
 CHANNELS = 1
 EPSILON = 1e-8
@@ -24,7 +24,7 @@ async def recorder(queue, input_stream) -> None:
     print("recording started")
     for _ in range(550):
         now = time.monotonic()
-        recorded_data = input_stream.read(512)
+        recorded_data = input_stream.read(CHUNK)
         await queue.put((now, recorded_data))
         await asyncio.sleep(EPSILON)
 
