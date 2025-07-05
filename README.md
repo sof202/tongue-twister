@@ -16,8 +16,9 @@ Go through the painful experience of installing conda on a windows machine,
 no I won't tell you how. Then create a new conda environment with:
 
 ```powershell
-cd ...\tongue-twister\envs\
-conda env create --file .\environment.yaml
+cd ...\tongue-twister
+conda env create --file envs\environment.yaml
+pip install -e .
 ```
 
 ## Running
