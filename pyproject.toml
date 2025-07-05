@@ -1,0 +1,19 @@
+[project]
+name = "tongue_twister"
+version = "0.1.0"
+
+[tool.ruff]
+line-length=79
+indent-width=4
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "UP",
+    "B",
+    "SIM",
+    "ANN",
+    "I",
+]
