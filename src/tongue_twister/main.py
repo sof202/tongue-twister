@@ -5,6 +5,7 @@ import time
 from argparse import Namespace
 import tkinter as tk
 from tkinter import ttk
+import threading
 
 FORMAT = pyaudio.paInt16
 CHUNK = 1024
@@ -125,13 +126,14 @@ class AudioManager:
 
 
 class App(tk.Tk):
-    def __init__(self):
+    def __init__(self, audio_manager: AudioManager):
         tk.Tk.__init__(self)
         self.title("Tongue Twister")
         self.attributes("-fullscreen", True)
         self.attributes("-topmost", True)
         self.set_styles()
         self.create_widgets()
+        self.audio_manager = audio_manager
 
     def set_styles(self) -> None:
         self.style = ttk.Style()
@@ -208,7 +210,7 @@ class App(tk.Tk):
             button_frame,
             text="Start/Stop",
             style="Dark.TButton",
-            command=lambda: print("start"),
+            command=self.start_stop_clicked,
         )
         self.start_stop_button.pack(side="left", padx=10)
 
@@ -224,10 +226,20 @@ class App(tk.Tk):
             self,
             text="✕",
             style="Exit.TButton",
-            command=lambda: self.destroy(),
+            command=self.quit_app,
             width=3,
         )
         self.exit_button.place(relx=0.99, rely=0.01, anchor="ne")
+
+    def start_stop_clicked(self):
+        if self.audio_manager.running:
+            self.audio_manager.stop()
+        else:
+            self.audio_manager.start()
+
+    def quit_app(self):
+        self.audio_manager.stop()
+        self.destroy()
 
 
 class Recorder:
@@ -310,27 +322,12 @@ class Player:
             self.queue.task_done()
 
 
-async def run_audio_loop(
-    input_device: int, output_device: int, delay_seconds: float
-) -> None:
-    queue = asyncio.Queue()
-    audio = pyaudio.PyAudio()
-    with Recorder(queue, audio, input_device) as recorder:
-        with Player(queue, audio, output_device, delay_seconds) as player:
-            await asyncio.gather(recorder.run(), player.run())
-    audio.terminate()
-
-
 def main(args: Namespace) -> None:
     if args.detect:
         print_available_audio_devices()
         return
-    app = App()
-    app.mainloop()
-    return
-
-    asyncio.run(
-        run_audio_loop(
-            args.input_device, args.output_device, args.delay_seconds
-        )
+    audio_manager = AudioManager(
+        args.input_device, args.output_device, args.delay_seconds
     )
+    app = App(audio_manager)
+    app.mainloop()
