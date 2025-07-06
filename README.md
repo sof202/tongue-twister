@@ -74,6 +74,12 @@ following keybinds:
 Despite my best efforts, I can't make `Tkinter` focus the window for these
 keybinds. As such one needs to click/focus the window before doing using them.
 
+> [!NOTE]
+> Space might not have been the best choice either as if you have clicked any
+> of the buttons, space will automatically click that button again (as well as
+> play/pausing). This isn't really a problem for me, maybe I'll fix it in the
+> future if it does.
+
 ## Operaring system addendum
 
 Above I say that you need windows and powershell. This isn't strictly true,
