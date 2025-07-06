@@ -8,6 +8,11 @@ def parse_args():
         description="A tongue twister game with delayed audio feedback",
     )
     parser.add_argument(
+        "--detect",
+        help="Print all detected input and output devices and exit",
+        action="store_true",
+    )
+    parser.add_argument(
         "--delay",
         help="The delay to use between input and output in milliseconds",
         type=int,

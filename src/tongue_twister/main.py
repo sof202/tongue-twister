@@ -20,6 +20,46 @@ def load_tongue_twisters():
         return tongue_twisters
 
 
+def print_available_audio_devices() -> None:
+    audio = pyaudio.PyAudio()
+    info = audio.get_host_api_info_by_index(0)
+    number_of_devices = info.get("deviceCount")
+    print("--input devices-------------------------------------------------")
+    for i in range(number_of_devices):
+        if (
+            audio.get_device_info_by_host_api_device_index(0, i).get(
+                "maxInputChannels"
+            )
+            > 0
+        ):
+            print(
+                "  ",
+                i,
+                "-",
+                audio.get_device_info_by_host_api_device_index(0, i).get(
+                    "name"
+                ),
+            )
+    print("--output devices------------------------------------------------")
+    for i in range(number_of_devices):
+        if (
+            audio.get_device_info_by_host_api_device_index(0, i).get(
+                "maxOutputChannels"
+            )
+            > 0
+        ):
+            print(
+                "  ",
+                i,
+                "-",
+                audio.get_device_info_by_host_api_device_index(0, i).get(
+                    "name"
+                ),
+            )
+
+    print("----------------------------------------------------------------")
+
+
 async def recorder(queue, input_stream) -> None:
     print("recording started")
     for _ in range(550):
@@ -73,5 +113,8 @@ async def run_audio_loop(delay) -> None:
     audio.terminate()
 
 
-def main(args):
+def main(args) -> None:
+    if args.detect:
+        print_available_audio_devices()
+        return
     asyncio.run(run_audio_loop(args.delay))
