@@ -176,8 +176,9 @@ class Recorder:
         self.queue = queue
         self.audio = audio
         self.input_device = input_device
+        self.running = True
 
-    def __enter__(self):
+    async def __aenter__(self):
         self.input_stream = self.audio.open(
             format=FORMAT,
             channels=CHANNELS,
@@ -188,14 +189,15 @@ class Recorder:
         )
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    async def __aexit__(self, exc_type, exc_value, traceback):
         if self.input_stream and not self.input_stream.is_stopped():
+            self.running = False
             self.input_stream.stop_stream()
             self.input_stream.close()
 
     async def run(self) -> None:
         print("recording started")
-        while True:
+        while self.running:
             now = time.monotonic()
             recorded_data = self.input_stream.read(CHUNK)
             await self.queue.put((now, recorded_data))
@@ -214,8 +216,9 @@ class Player:
         self.audio = audio
         self.output_device = output_device
         self.delay_seconds = delay_seconds
+        self.running = True
 
-    def __enter__(self):
+    async def __aenter__(self):
         self.output_stream = self.audio.open(
             format=FORMAT,
             channels=CHANNELS,
@@ -225,8 +228,9 @@ class Player:
         )
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    async def __aexit__(self, exc_type, exc_value, traceback):
         if self.output_stream and not self.output_stream.is_stopped():
+            self.running = False
             self.output_stream.stop_stream()
             self.output_stream.close()
 
@@ -234,6 +238,7 @@ class Player:
         while True:
             item = await self.queue.get()
             if item is None:
+                self.queue.task_done()
                 break
             timestamp, recorded_data = item
             now = time.monotonic()
