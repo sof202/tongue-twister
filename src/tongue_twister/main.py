@@ -61,33 +61,43 @@ def print_available_audio_devices() -> None:
     print("----------------------------------------------------------------")
 
 
-async def recorder(queue: asyncio.Queue, input_stream: pyaudio.Stream) -> None:
-    print("recording started")
-    for _ in range(550):
-        now = time.monotonic()
-        recorded_data = input_stream.read(CHUNK)
-        await queue.put((now, recorded_data))
-        await asyncio.sleep(EPSILON)
+class Recorder:
+    def __init__(self, queue: asyncio.Queue, input_stream: pyaudio.Stream):
+        self.queue = queue
+        self.input_stream = input_stream
 
-    # sentinel value for end of queue
-    await queue.put(None)
+    async def run(self) -> None:
+        print("recording started")
+        while True:
+            now = time.monotonic()
+            recorded_data = self.input_stream.read(CHUNK)
+            await self.queue.put((now, recorded_data))
+            await asyncio.sleep(EPSILON)
 
 
-async def player(
-    queue: asyncio.Queue, output_stream: pyaudio.Stream, delay_seconds: float
-) -> None:
-    while True:
-        item = await queue.get()
-        if item is None:
-            break
-        timestamp, recorded_data = item
-        now = time.monotonic()
-        consume_at = timestamp + delay_seconds
-        sleep_time = max(0, consume_at - now)
-        await asyncio.sleep(sleep_time)
-        output_stream.write(recorded_data)
-        queue.task_done()
-    print("finished playing")
+class Player:
+    def __init__(
+        self,
+        queue: asyncio.Queue,
+        output_stream: pyaudio.Stream,
+        delay_seconds: float,
+    ):
+        self.queue = queue
+        self.output_stream = output_stream
+        self.delay_seconds = delay_seconds
+
+    async def run(self) -> None:
+        while True:
+            item = await self.queue.get()
+            if item is None:
+                break
+            timestamp, recorded_data = item
+            now = time.monotonic()
+            consume_at = timestamp + self.delay_seconds
+            sleep_time = max(0, consume_at - now)
+            await asyncio.sleep(sleep_time)
+            self.output_stream.write(recorded_data)
+            self.queue.task_done()
 
 
 async def run_audio_loop(
@@ -103,6 +113,7 @@ async def run_audio_loop(
         input_device_index=input_device,
         frames_per_buffer=CHUNK,
     )
+    recorder = Recorder(queue, input_stream)
     output_stream = audio.open(
         format=FORMAT,
         channels=CHANNELS,
@@ -110,10 +121,8 @@ async def run_audio_loop(
         output=True,
         output_device_index=output_device,
     )
-    await asyncio.gather(
-        recorder(queue, input_stream),
-        player(queue, output_stream, delay_seconds),
-    )
+    player = Player(queue, output_stream, delay_seconds)
+    await asyncio.gather(recorder.run(), player.run())
     input_stream.stop_stream()
     input_stream.close()
     output_stream.close()
