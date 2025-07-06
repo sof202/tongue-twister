@@ -184,18 +184,18 @@ class App(tk.Tk):
 
         self.style.configure(
             "Main.TLabel",
-            font=("Segoe UI", 24),
+            font=("Segoe UI", 40),
             background=self.bg_colour,
             foreground=self.text_colour,
             anchor="center",
-            padding=20,
+            padding=0,
         )
 
         self.style.configure("ButtonFrame.TFrame", background=self.bg_colour)
 
         self.style.configure(
             "TButton",
-            font=("Segoe UI", 18),
+            font=("Segoe UI", 24),
             padding=10,
             relief="flat",
             cursor="hand2",
@@ -233,7 +233,8 @@ class App(tk.Tk):
             self,
             text=self.help_message,
             style="Main.TLabel",
-            wraplength=self.winfo_screenwidth() - 100,
+            wraplength=self.winfo_screenwidth() - 300,
+            justify=tk.CENTER,
         )
         self.text_box.grid(row=0, column=0, sticky="nsew", padx=50, pady=50)
 
