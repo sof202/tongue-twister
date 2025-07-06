@@ -45,7 +45,7 @@ class App(tk.Tk):
 
         self.style.configure(
             "Main.TLabel",
-            font=("Segoe UI", 40),
+            font=("Segoe UI", 55),
             background=self.bg_colour,
             foreground=self.text_colour,
             anchor="center",
