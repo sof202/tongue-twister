@@ -67,6 +67,31 @@ class AudioManager:
         self.input_device = input_device
         self.output_device = output_device
         self.delay_seconds = delay_seconds
+        self.check_audio_devices()
+
+    def check_audio_devices(self):
+        info = self.audio.get_host_api_info_by_index(0)
+        number_of_devices = info.get("deviceCount")
+        if self.input_device > number_of_devices:
+            raise OSError(f"Input device doesn't exist - {self.input_device}")
+        if self.output_device > number_of_devices:
+            raise OSError(
+                f"Output device doesn't exist - {self.output_device}"
+            )
+        if (
+            self.audio.get_device_info_by_host_api_device_index(
+                0, self.input_device
+            ).get("maxInputChannels")
+            < 1
+        ):
+            raise OSError("Input device has no input channels")
+        if (
+            self.audio.get_device_info_by_host_api_device_index(
+                0, self.output_device
+            ).get("maxOutputChannels")
+            < 1
+        ):
+            raise OSError("Output device has no output channels")
 
     def start(self) -> None:
         if not self.running:
