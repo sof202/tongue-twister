@@ -195,7 +195,7 @@ class App(tk.Tk):
 
         self.style.configure(
             "TButton",
-            font=("Segoe UI", 12),
+            font=("Segoe UI", 18),
             padding=10,
             relief="flat",
             cursor="hand2",
@@ -242,7 +242,7 @@ class App(tk.Tk):
 
         self.start_stop_button = ttk.Button(
             button_frame,
-            text="Start/Stop",
+            text="Start/Stop ⏯",
             style="Dark.TButton",
             command=self.start_stop_clicked,
         )
@@ -250,7 +250,7 @@ class App(tk.Tk):
 
         self.next_button = ttk.Button(
             button_frame,
-            text="Next",
+            text="Next ⏭",
             style="Dark.TButton",
             command=self.get_new_tongue_twister,
         )
