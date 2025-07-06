@@ -74,3 +74,13 @@ following keybinds:
 Despite my best efforts, I can't make `Tkinter` focus the window for these
 keybinds. As such one needs to click/focus the window before doing using them.
 
+## Operaring system addendum
+
+Above I say that you need windows and powershell. This isn't strictly true,
+All you really need is to have a python environment (version >=3.8) that is
+capable of loading pyaudio (version >=0.2.11). After these conditions are met,
+one can simply run the `cli.py` script via:
+
+```sh
+python .../tongue-twister/src/tongue_twister/cli.py
+```
