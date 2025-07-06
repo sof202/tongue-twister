@@ -60,3 +60,17 @@ After this a new window will pop up (using python's `Tkinter`), a help message
 is shown on startup, this can be redrawn to the screen upon clicking on the
 help button in the top left corner. To exit you can use `alt+f4` or click
 the red x button in the top right.
+
+### Keybinds
+
+Alternatively instead of using the buttons on the GUI, you can use the
+following keybinds:
+
+- "<space>": Play/Pause
+- "n": Displays next tongue twister
+- "h": Displays help message
+- "q": Quits the program
+
+Despite my best efforts, I can't make `Tkinter` focus the window for these
+keybinds. As such one needs to click/focus the window before doing using them.
+
