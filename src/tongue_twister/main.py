@@ -87,7 +87,7 @@ async def player(queue, output_stream, delay) -> None:
     print("finished playing")
 
 
-async def run_audio_loop(delay) -> None:
+async def run_audio_loop(input_device, output_device, delay) -> None:
     queue = asyncio.Queue()
     audio = pyaudio.PyAudio()
     input_stream = audio.open(
@@ -95,7 +95,7 @@ async def run_audio_loop(delay) -> None:
         channels=CHANNELS,
         rate=RATE,
         input=True,
-        input_device_index=1,
+        input_device_index=input_device,
         frames_per_buffer=CHUNK,
     )
     output_stream = audio.open(
@@ -103,6 +103,7 @@ async def run_audio_loop(delay) -> None:
         channels=CHANNELS,
         rate=RATE,
         output=True,
+        output_device_index=output_device,
     )
     await asyncio.gather(
         recorder(queue, input_stream), player(queue, output_stream, delay)
@@ -117,4 +118,6 @@ def main(args) -> None:
     if args.detect:
         print_available_audio_devices()
         return
-    asyncio.run(run_audio_loop(args.delay))
+    asyncio.run(
+        run_audio_loop(args.input_device, args.output_device, args.delay)
+    )

@@ -18,6 +18,20 @@ def parse_args():
         type=int,
         default=0.5,
     )
+    parser.add_argument(
+        "-i",
+        "--input-device",
+        help="The input device to use, use --detect for help",
+        type=int,
+        default=1,
+    )
+    parser.add_argument(
+        "-o",
+        "--output-device",
+        help="The output device to use, use --detect for help",
+        type=int,
+        default=1,
+    )
     args = parser.parse_args()
 
     return args
