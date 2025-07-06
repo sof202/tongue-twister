@@ -179,7 +179,6 @@ class App(tk.Tk):
         self.button_hover_colour = "#444444"
         self.button_active_colour = "#555555"
         self.exit_button_colour = "#5c1e1e"
-        self.help_button_colour = "#5c1e1e"
 
         self.configure(background=self.bg_colour)
 
@@ -211,12 +210,6 @@ class App(tk.Tk):
         self.style.configure(
             "Exit.TButton",
             background=self.exit_button_colour,
-            foreground=self.text_colour,
-        )
-
-        self.style.configure(
-            "Help.TButton",
-            background=self.help_button_colour,
             foreground=self.text_colour,
         )
 
@@ -275,7 +268,7 @@ class App(tk.Tk):
         self.help_button = ttk.Button(
             self,
             text="?",
-            style="Help.TButton",
+            style="Dark.TButton",
             command=self.set_help,
             width=3,
         )
