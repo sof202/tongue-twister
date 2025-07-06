@@ -164,8 +164,11 @@ class App(tk.Tk):
         self.attributes("-topmost", True)
         self.set_styles()
         self.help_message = (
-            "Press next for new tongue twister, "
-            "then press start and try to say the tongue twister."
+            "HELP\n"
+            "1) Press next to get a new tongue twister.\n\n"
+            "2) Press start/stop to begin delayed audio feedback and try to "
+            "say the tongue twister.\n\n"
+            "3) Press start/stop again to end the delayed audio feedback."
         )
         self.create_widgets()
 
