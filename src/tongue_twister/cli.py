@@ -17,7 +17,7 @@ def parse_args() -> argparse.Namespace:
         "--delay-seconds",
         help="The delay to use between input and output in seconds",
         type=float,
-        default=0.5,
+        default=0.175,
     )
     parser.add_argument(
         "-i",
