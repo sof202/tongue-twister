@@ -179,6 +179,7 @@ class App(tk.Tk):
         self.button_hover_colour = "#444444"
         self.button_active_colour = "#555555"
         self.exit_button_colour = "#5c1e1e"
+        self.help_button_colour = "#5c1e1e"
 
         self.configure(background=self.bg_colour)
 
@@ -210,6 +211,12 @@ class App(tk.Tk):
         self.style.configure(
             "Exit.TButton",
             background=self.exit_button_colour,
+            foreground=self.text_colour,
+        )
+
+        self.style.configure(
+            "Help.TButton",
+            background=self.help_button_colour,
             foreground=self.text_colour,
         )
 
@@ -264,6 +271,18 @@ class App(tk.Tk):
             width=3,
         )
         self.exit_button.place(relx=0.99, rely=0.01, anchor="ne")
+
+        self.help_button = ttk.Button(
+            self,
+            text="?",
+            style="Help.TButton",
+            command=self.set_help,
+            width=3,
+        )
+        self.help_button.place(relx=0.01, rely=0.01, anchor="nw")
+
+    def set_help(self) -> None:
+        self.text_box.config(text=self.help_message)
 
     def get_new_tongue_twister(self) -> None:
         self.text_box.config(
