@@ -4,6 +4,7 @@ from core.audio_manager import AudioManager, print_available_audio_devices
 from core.gui import App
 from core.tongue_twister_manager import TongueTwistersManager
 from tongue_twister_exceptions import (
+    TongueTwisterException,
     DeviceNotFoundException,
     InvalidDeviceChannelsException,
 )
@@ -21,7 +22,9 @@ def main(args: Namespace) -> None:
         app = App(audio_manager, tongue_twister_manager)
         app.mainloop()
     except (DeviceNotFoundException, InvalidDeviceChannelsException) as e:
-        print(f"Error with given audio devices: {e}")
+        print(f"AUDIO DEVICES ERROR: {e}")
         print("Try running with --detect to find valid audio device indexes")
+    except TongueTwisterException as e:
+        print(f"TONGUE TWISTER ERROR: {e}")
     except Exception as e:
         print(f"Uncaught error: {e}")
