@@ -62,9 +62,28 @@ def print_available_audio_devices() -> None:
 
 
 class Recorder:
-    def __init__(self, queue: asyncio.Queue, input_stream: pyaudio.Stream):
+    def __init__(
+        self, queue: asyncio.Queue, audio: pyaudio.PyAudio, input_device: int
+    ):
         self.queue = queue
-        self.input_stream = input_stream
+        self.audio = audio
+        self.input_device = input_device
+
+    def __enter__(self):
+        self.input_stream = self.audio.open(
+            format=FORMAT,
+            channels=CHANNELS,
+            rate=RATE,
+            input=True,
+            input_device_index=self.input_device,
+            frames_per_buffer=CHUNK,
+        )
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self.input_stream and not self.input_stream.is_stopped():
+            self.input_stream.stop_stream()
+            self.input_stream.close()
 
     async def run(self) -> None:
         print("recording started")
@@ -79,12 +98,29 @@ class Player:
     def __init__(
         self,
         queue: asyncio.Queue,
-        output_stream: pyaudio.Stream,
+        audio: pyaudio.PyAudio,
+        output_device: int,
         delay_seconds: float,
     ):
         self.queue = queue
-        self.output_stream = output_stream
+        self.audio = audio
+        self.output_device = output_device
         self.delay_seconds = delay_seconds
+
+    def __enter__(self):
+        self.output_stream = self.audio.open(
+            format=FORMAT,
+            channels=CHANNELS,
+            rate=RATE,
+            output=True,
+            output_device_index=self.output_device,
+        )
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self.output_stream and not self.output_stream.is_stopped():
+            self.output_stream.stop_stream()
+            self.output_stream.close()
 
     async def run(self) -> None:
         while True:
@@ -105,27 +141,9 @@ async def run_audio_loop(
 ) -> None:
     queue = asyncio.Queue()
     audio = pyaudio.PyAudio()
-    input_stream = audio.open(
-        format=FORMAT,
-        channels=CHANNELS,
-        rate=RATE,
-        input=True,
-        input_device_index=input_device,
-        frames_per_buffer=CHUNK,
-    )
-    recorder = Recorder(queue, input_stream)
-    output_stream = audio.open(
-        format=FORMAT,
-        channels=CHANNELS,
-        rate=RATE,
-        output=True,
-        output_device_index=output_device,
-    )
-    player = Player(queue, output_stream, delay_seconds)
-    await asyncio.gather(recorder.run(), player.run())
-    input_stream.stop_stream()
-    input_stream.close()
-    output_stream.close()
+    with Recorder(queue, audio, input_device) as recorder:
+        with Player(queue, audio, output_device, delay_seconds) as player:
+            await asyncio.gather(recorder.run(), player.run())
     audio.terminate()
 
 
