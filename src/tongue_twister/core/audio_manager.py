@@ -12,9 +12,9 @@ from tongue_twister_exceptions import (
 
 import pyaudio
 
-FORMAT = pyaudio.paInt16
-CHUNK = 1024
-RATE = 44100
+FORMAT = pyaudio.paInt24
+CHUNK = 2048
+RATE = 48000
 CHANNELS = 1
 EPSILON = 1e-8
 
