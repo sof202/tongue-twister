@@ -6,10 +6,10 @@ import threading
 import time
 import tkinter as tk
 from argparse import Namespace
+from random import shuffle
 from tkinter import ttk
 from types import TracebackType
 from typing import Optional, Type
-from random import shuffle
 
 import pyaudio
 
@@ -151,14 +151,23 @@ class AudioManager:
 
 
 class App(tk.Tk):
-    def __init__(self, audio_manager: AudioManager) -> None:
+    def __init__(
+        self,
+        audio_manager: AudioManager,
+        tongue_twister_manager: TongueTwistersManager,
+    ) -> None:
         super().__init__()
-        self.title("Tongue Twister")
+        self.audio_manager = audio_manager
+        self.tongue_twister_manager = tongue_twister_manager
+        self.title("Tongue Twisters")
         self.attributes("-fullscreen", True)
         self.attributes("-topmost", True)
         self.set_styles()
+        self.help_message = (
+            "Press next for new tongue twister, "
+            "then press start and try to say the tongue twister."
+        )
         self.create_widgets()
-        self.audio_manager = audio_manager
 
     def set_styles(self) -> None:
         self.style = ttk.Style()
@@ -222,7 +231,7 @@ class App(tk.Tk):
     def create_widgets(self) -> None:
         self.text_box = ttk.Label(
             self,
-            text="This is test text",
+            text=self.help_message,
             style="Main.TLabel",
             wraplength=self.winfo_screenwidth() - 100,
         )
@@ -243,7 +252,7 @@ class App(tk.Tk):
             button_frame,
             text="Next",
             style="Dark.TButton",
-            command=lambda: print("next"),
+            command=self.get_new_tongue_twister,
         )
         self.next_button.pack(side="left", padx=10)
 
@@ -255,6 +264,11 @@ class App(tk.Tk):
             width=3,
         )
         self.exit_button.place(relx=0.99, rely=0.01, anchor="ne")
+
+    def get_new_tongue_twister(self) -> None:
+        self.text_box.config(
+            text=self.tongue_twister_manager.get_next_tongue_twister()
+        )
 
     def start_stop_clicked(self) -> None:
         if self.audio_manager.running:
@@ -361,8 +375,9 @@ def main(args: Namespace) -> None:
     if args.detect:
         print_available_audio_devices()
         return
+    tongue_twister_manager = TongueTwistersManager("tongue_twisters.txt")
     audio_manager = AudioManager(
         args.input_device, args.output_device, args.delay_seconds
     )
-    app = App(audio_manager)
+    app = App(audio_manager, tongue_twister_manager)
     app.mainloop()
