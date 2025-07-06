@@ -28,6 +28,7 @@ class App(tk.Tk):
             "3) Press start/stop again to end the delayed audio feedback."
         )
         self.create_widgets()
+        self.create_keybinds()
 
     def set_styles(self) -> None:
         self.style = ttk.Style()
@@ -135,20 +136,26 @@ class App(tk.Tk):
         )
         self.help_button.place(relx=0.01, rely=0.01, anchor="nw")
 
-    def set_help(self) -> None:
+    def create_keybinds(self) -> None:
+        self.bind("n", self.get_new_tongue_twister)
+        self.bind("<space>", self.start_stop_clicked)
+        self.bind("h", self.set_help)
+        self.bind("q", self.quit_app)
+
+    def set_help(self, event: tk.Event = None) -> None:
         self.text_box.config(text=self.help_message)
 
-    def get_new_tongue_twister(self) -> None:
+    def get_new_tongue_twister(self, event: tk.Event = None) -> None:
         self.text_box.config(
             text=self.tongue_twister_manager.get_next_tongue_twister()
         )
 
-    def start_stop_clicked(self) -> None:
+    def start_stop_clicked(self, event: tk.Event = None) -> None:
         if self.audio_manager.running:
             self.audio_manager.stop()
         else:
             self.audio_manager.start()
 
-    def quit_app(self) -> None:
+    def quit_app(self, event: tk.Event = None) -> None:
         self.audio_manager.stop()
         self.destroy()
