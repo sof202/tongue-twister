@@ -127,7 +127,7 @@ class AudioManager:
 
 class App(tk.Tk):
     def __init__(self, audio_manager: AudioManager):
-        tk.Tk.__init__(self)
+        super().__init__()
         self.title("Tongue Twister")
         self.attributes("-fullscreen", True)
         self.attributes("-topmost", True)
