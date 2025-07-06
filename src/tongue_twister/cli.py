@@ -2,7 +2,7 @@ import argparse
 from main import main
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         prog="tongue_twister",
         description="A tongue twister game with delayed audio feedback",
@@ -13,7 +13,7 @@ def parse_args():
         action="store_true",
     )
     parser.add_argument(
-        "--delay",
+        "--delay-seconds",
         help="The delay to use between input and output in seconds",
         type=float,
         default=0.5,

@@ -2,6 +2,7 @@ import importlib.resources
 import asyncio
 import pyaudio
 import time
+from argparse import Namespace
 
 FORMAT = pyaudio.paInt16
 CHUNK = 1024
@@ -60,7 +61,7 @@ def print_available_audio_devices() -> None:
     print("----------------------------------------------------------------")
 
 
-async def recorder(queue, input_stream) -> None:
+async def recorder(queue: asyncio.Queue, input_stream: pyaudio.Stream) -> None:
     print("recording started")
     for _ in range(550):
         now = time.monotonic()
@@ -72,14 +73,16 @@ async def recorder(queue, input_stream) -> None:
     await queue.put(None)
 
 
-async def player(queue, output_stream, delay) -> None:
+async def player(
+    queue: asyncio.Queue, output_stream: pyaudio.Stream, delay_seconds: float
+) -> None:
     while True:
         item = await queue.get()
         if item is None:
             break
         timestamp, recorded_data = item
         now = time.monotonic()
-        consume_at = timestamp + delay
+        consume_at = timestamp + delay_seconds
         sleep_time = max(0, consume_at - now)
         await asyncio.sleep(sleep_time)
         output_stream.write(recorded_data)
@@ -87,7 +90,9 @@ async def player(queue, output_stream, delay) -> None:
     print("finished playing")
 
 
-async def run_audio_loop(input_device, output_device, delay) -> None:
+async def run_audio_loop(
+    input_device: int, output_device: int, delay_seconds: float
+) -> None:
     queue = asyncio.Queue()
     audio = pyaudio.PyAudio()
     input_stream = audio.open(
@@ -106,7 +111,8 @@ async def run_audio_loop(input_device, output_device, delay) -> None:
         output_device_index=output_device,
     )
     await asyncio.gather(
-        recorder(queue, input_stream), player(queue, output_stream, delay)
+        recorder(queue, input_stream),
+        player(queue, output_stream, delay_seconds),
     )
     input_stream.stop_stream()
     input_stream.close()
@@ -114,10 +120,12 @@ async def run_audio_loop(input_device, output_device, delay) -> None:
     audio.terminate()
 
 
-def main(args) -> None:
+def main(args: Namespace) -> None:
     if args.detect:
         print_available_audio_devices()
         return
     asyncio.run(
-        run_audio_loop(args.input_device, args.output_device, args.delay)
+        run_audio_loop(
+            args.input_device, args.output_device, args.delay_seconds
+        )
     )
