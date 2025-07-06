@@ -55,3 +55,8 @@ powershell.exe "& .../run.ps1"  -i 1 -o 2
 # From Powershell
 & .../run.ps1 -i 1 -o 2
 ```
+
+After this a new window will pop up (using python's `Tkinter`), a help message
+is shown on startup, this can be redrawn to the screen upon clicking on the
+help button in the top left corner. To exit you can use `alt+f4` or click
+the red x button in the top right.
