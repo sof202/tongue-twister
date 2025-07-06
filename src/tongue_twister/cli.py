@@ -24,14 +24,14 @@ def parse_args() -> argparse.Namespace:
         "--input-device",
         help="The input device to use, use --detect for help",
         type=int,
-        default=1,
+        default=0,
     )
     parser.add_argument(
         "-o",
         "--output-device",
         help="The output device to use, use --detect for help",
         type=int,
-        default=1,
+        default=0,
     )
     args = parser.parse_args()
 
