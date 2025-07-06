@@ -9,6 +9,7 @@ from argparse import Namespace
 from tkinter import ttk
 from types import TracebackType
 from typing import Optional, Type
+from random import shuffle
 
 import pyaudio
 
@@ -19,14 +20,31 @@ CHANNELS = 1
 EPSILON = 1e-8
 
 
-def load_tongue_twisters() -> list[str]:
-    with importlib.resources.open_text(
-        "tongue_twister.data", "tongue_twisters.txt"
-    ) as file:
-        tongue_twisters = []
-        for line in file.readlines():
-            tongue_twisters.append(line.strip())
-        return tongue_twisters
+class TongueTwistersManager:
+    def __init__(self, file: str) -> None:
+        self.file = file
+        self.tongue_twisters = []
+        self.current_index = 0
+        self.load_tongue_twisters()
+        self.shuffle_tongue_twisters()
+
+    def load_tongue_twisters(self) -> list[str]:
+        with importlib.resources.open_text("data", self.file) as file:
+            for line in file.readlines():
+                self.tongue_twisters.append(line.strip())
+
+    def shuffle_tongue_twisters(self) -> None:
+        shuffle(self.tongue_twisters)
+
+    def get_next_tongue_twister(self) -> str:
+        if len(self.tongue_twisters) == 0:
+            # TODO: add custom exception
+            print("No tongue twisters loaded")
+        if len(self.tongue_twisters) <= self.current_index:
+            self.current_index = 0
+        tongue_twister = self.tongue_twisters[self.current_index]
+        self.current_index += 1
+        return tongue_twister
 
 
 def print_available_audio_devices() -> None:
