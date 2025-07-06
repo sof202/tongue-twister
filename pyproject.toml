@@ -17,6 +17,7 @@ select = [
     "ANN",
     "I",
 ]
+ignore = ["SIM117"]
 
 [build-system]
 requires = ["setuptools"]
