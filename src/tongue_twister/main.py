@@ -1,11 +1,16 @@
-import importlib.resources
+from __future__ import annotations
+
 import asyncio
-import pyaudio
-import time
-from argparse import Namespace
-import tkinter as tk
-from tkinter import ttk
+import importlib.resources
 import threading
+import time
+import tkinter as tk
+from argparse import Namespace
+from tkinter import ttk
+from types import TracebackType
+from typing import Optional, Type
+
+import pyaudio
 
 FORMAT = pyaudio.paInt16
 CHUNK = 1024
@@ -14,7 +19,7 @@ CHANNELS = 1
 EPSILON = 1e-8
 
 
-def load_tongue_twisters():
+def load_tongue_twisters() -> list[str]:
     with importlib.resources.open_text(
         "tongue_twister.data", "tongue_twisters.txt"
     ) as file:
@@ -65,7 +70,9 @@ def print_available_audio_devices() -> None:
 
 
 class AudioManager:
-    def __init__(self, input_device, output_device, delay_seconds):
+    def __init__(
+        self, input_device: int, output_device: int, delay_seconds: float
+    ) -> None:
         self.audio = pyaudio.PyAudio()
         self.running = False
         self.loop = None
@@ -75,7 +82,7 @@ class AudioManager:
         self.output_device = output_device
         self.delay_seconds = delay_seconds
 
-    def start(self):
+    def start(self) -> None:
         if not self.running:
             self.running = True
             self.loop = asyncio.new_event_loop()
@@ -83,7 +90,7 @@ class AudioManager:
             self.thread = threading.Thread(target=self.run_loop, daemon=True)
             self.thread.start()
 
-    def stop(self):
+    def stop(self) -> None:
         if self.running:
             self.running = False
             if self.loop and not self.loop.is_closed():
@@ -91,10 +98,10 @@ class AudioManager:
                     self.queue.put(None), self.loop
                 )
 
-    def run_loop(self):
+    def run_loop(self) -> None:
         asyncio.set_event_loop(self.loop)
 
-        async def run_tasks():
+        async def run_tasks() -> None:
             async with Recorder(
                 self.queue, self.audio, self.input_device
             ) as recorder:
@@ -126,7 +133,7 @@ class AudioManager:
 
 
 class App(tk.Tk):
-    def __init__(self, audio_manager: AudioManager):
+    def __init__(self, audio_manager: AudioManager) -> None:
         super().__init__()
         self.title("Tongue Twister")
         self.attributes("-fullscreen", True)
@@ -231,13 +238,13 @@ class App(tk.Tk):
         )
         self.exit_button.place(relx=0.99, rely=0.01, anchor="ne")
 
-    def start_stop_clicked(self):
+    def start_stop_clicked(self) -> None:
         if self.audio_manager.running:
             self.audio_manager.stop()
         else:
             self.audio_manager.start()
 
-    def quit_app(self):
+    def quit_app(self) -> None:
         self.audio_manager.stop()
         self.destroy()
 
@@ -245,13 +252,13 @@ class App(tk.Tk):
 class Recorder:
     def __init__(
         self, queue: asyncio.Queue, audio: pyaudio.PyAudio, input_device: int
-    ):
+    ) -> None:
         self.queue = queue
         self.audio = audio
         self.input_device = input_device
         self.running = True
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> Recorder:
         self.input_stream = self.audio.open(
             format=FORMAT,
             channels=CHANNELS,
@@ -262,7 +269,12 @@ class Recorder:
         )
         return self
 
-    async def __aexit__(self, exc_type, exc_value, traceback):
+    async def __aexit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
         if self.input_stream and not self.input_stream.is_stopped():
             self.running = False
             self.input_stream.stop_stream()
@@ -284,14 +296,14 @@ class Player:
         audio: pyaudio.PyAudio,
         output_device: int,
         delay_seconds: float,
-    ):
+    ) -> None:
         self.queue = queue
         self.audio = audio
         self.output_device = output_device
         self.delay_seconds = delay_seconds
         self.running = True
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> Player:
         self.output_stream = self.audio.open(
             format=FORMAT,
             channels=CHANNELS,
@@ -301,7 +313,12 @@ class Player:
         )
         return self
 
-    async def __aexit__(self, exc_type, exc_value, traceback):
+    async def __aexit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
         if self.output_stream and not self.output_stream.is_stopped():
             self.running = False
             self.output_stream.stop_stream()
