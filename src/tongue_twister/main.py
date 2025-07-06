@@ -63,6 +63,67 @@ def print_available_audio_devices() -> None:
     print("----------------------------------------------------------------")
 
 
+class AudioManager:
+    def __init__(self, input_device, output_device, delay_seconds):
+        self.audio = pyaudio.PyAudio()
+        self.running = False
+        self.loop = None
+        self.queue = None
+        self.thread = None
+        self.input_device = input_device
+        self.output_device = output_device
+        self.delay_seconds = delay_seconds
+
+    def start(self):
+        if not self.running:
+            self.running = True
+            self.loop = asyncio.new_event_loop()
+            self.queue = asyncio.Queue(loop=self.loop)
+            self.thread = threading.Thread(target=self.run_loop, daemon=True)
+            self.thread.start()
+
+    def stop(self):
+        if self.running:
+            self.running = False
+            if self.loop and not self.loop.is_closed():
+                asyncio.run_coroutine_threadsafe(
+                    self.queue.put(None), self.loop
+                )
+
+    def run_loop(self):
+        asyncio.set_event_loop(self.loop)
+
+        async def run_tasks():
+            async with Recorder(
+                self.queue, self.audio, self.input_device
+            ) as recorder:
+                async with Player(
+                    self.queue,
+                    self.audio,
+                    self.output_device,
+                    self.delay_seconds,
+                ) as player:
+                    await asyncio.gather(recorder.run(), player.run())
+
+        try:
+            self.loop.run_until_complete(run_tasks())
+        except asyncio.CancelledError:
+            pass
+        except Exception as e:
+            print(f"ERROR (AudioManager): {e}")
+        finally:
+            if self.loop and not self.loop.is_closed():
+                tasks = asyncio.all_tasks(loop=self.loop)
+                for task in tasks:
+                    task.cancel()
+                self.loop.run_until_complete(
+                    asyncio.gather(*tasks, return_exceptions=True)
+                )
+                self.loop.close()
+            self.loop = None
+            self.queue = None
+
+
 class App(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
