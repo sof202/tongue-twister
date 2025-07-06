@@ -14,8 +14,8 @@ def parse_args():
     )
     parser.add_argument(
         "--delay",
-        help="The delay to use between input and output in milliseconds",
-        type=int,
+        help="The delay to use between input and output in seconds",
+        type=float,
         default=0.5,
     )
     parser.add_argument(
