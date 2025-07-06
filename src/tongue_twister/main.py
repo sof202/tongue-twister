@@ -163,7 +163,7 @@ class App(tk.Tk):
             self,
             text="✕",
             style="Exit.TButton",
-            command=lambda: print("exit"),
+            command=lambda: self.destroy(),
             width=3,
         )
         self.exit_button.place(relx=0.99, rely=0.01, anchor="ne")
