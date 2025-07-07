@@ -5,12 +5,12 @@ import threading
 import time
 from types import TracebackType
 from typing import Optional, Type
+
+import pyaudio
 from tongue_twister_exceptions import (
     DeviceNotFoundException,
     InvalidDeviceChannelsException,
 )
-
-import pyaudio
 
 FORMAT = pyaudio.paInt24
 CHUNK = 2048

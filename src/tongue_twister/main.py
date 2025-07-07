@@ -4,9 +4,9 @@ from core.audio_manager import AudioManager, print_available_audio_devices
 from core.gui import App
 from core.tongue_twister_manager import TongueTwistersManager
 from tongue_twister_exceptions import (
-    TongueTwisterException,
     DeviceNotFoundException,
     InvalidDeviceChannelsException,
+    TongueTwisterException,
 )
 
 

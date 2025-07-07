@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.resources
 from random import shuffle
+
 from tongue_twister_exceptions import (
     NoTongueTwistersLoadedException,
     TongueTwisterLoadingException,
