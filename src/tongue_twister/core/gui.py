@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import tkinter as tk
 from tkinter import ttk
+from typing import Optional
 
 from core.audio_manager import AudioManager
 from core.tongue_twister_manager import TongueTwistersManager
@@ -142,20 +143,20 @@ class App(tk.Tk):
         self.bind("h", self.set_help)
         self.bind("q", self.quit_app)
 
-    def set_help(self, event: tk.Event = None) -> None:
+    def set_help(self, event: Optional[tk.Event] = None) -> None:
         self.text_box.config(text=self.help_message)
 
-    def get_new_tongue_twister(self, event: tk.Event = None) -> None:
+    def get_new_tongue_twister(self, event: Optional[tk.Event] = None) -> None:
         self.text_box.config(
             text=self.tongue_twister_manager.get_next_tongue_twister()
         )
 
-    def start_stop_clicked(self, event: tk.Event = None) -> None:
+    def start_stop_clicked(self, event: Optional[tk.Event] = None) -> None:
         if self.audio_manager.running:
             self.audio_manager.stop()
         else:
             self.audio_manager.start()
 
-    def quit_app(self, event: tk.Event = None) -> None:
+    def quit_app(self, event: Optional[tk.Event] = None) -> None:
         self.audio_manager.stop()
         self.destroy()

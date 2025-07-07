@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.resources
 from random import shuffle
+from typing import Optional
 
 from tongue_twister_exceptions import (
     NoTongueTwistersLoadedException,
@@ -17,7 +18,7 @@ class TongueTwistersManager:
         self.load_tongue_twisters()
         self.shuffle_tongue_twisters()
 
-    def load_tongue_twisters(self) -> list[str]:
+    def load_tongue_twisters(self) -> Optional[list[str]]:
         try:
             with importlib.resources.open_text("data", self.file) as file:
                 for line in file.readlines():
