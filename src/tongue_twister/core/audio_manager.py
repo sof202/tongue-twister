@@ -10,6 +10,7 @@ import pyaudio
 from tongue_twister_exceptions import (
     DeviceNotFoundException,
     InvalidDeviceChannelsException,
+    TongueTwisterException,
 )
 
 FORMAT = pyaudio.paInt24
@@ -22,12 +23,15 @@ EPSILON = 1e-8
 def print_available_audio_devices() -> None:
     audio = pyaudio.PyAudio()
     info = audio.get_host_api_info_by_index(0)
-    number_of_devices = info.get("deviceCount")
+    number_of_devices = int(info.get("deviceCount") or 0)
     print("--input devices-------------------------------------------------")
     for i in range(number_of_devices):
         if (
-            audio.get_device_info_by_host_api_device_index(0, i).get(
-                "maxInputChannels"
+            int(
+                audio.get_device_info_by_host_api_device_index(0, i).get(
+                    "maxInputChannels"
+                )
+                or 0
             )
             > 0
         ):
@@ -42,8 +46,11 @@ def print_available_audio_devices() -> None:
     print("--output devices------------------------------------------------")
     for i in range(number_of_devices):
         if (
-            audio.get_device_info_by_host_api_device_index(0, i).get(
-                "maxOutputChannels"
+            int(
+                audio.get_device_info_by_host_api_device_index(0, i).get(
+                    "maxOutputChannels"
+                )
+                or 0
             )
             > 0
         ):
@@ -75,7 +82,7 @@ class AudioManager:
 
     def check_audio_devices(self) -> None:
         info = self.audio.get_host_api_info_by_index(0)
-        number_of_devices = info.get("deviceCount")
+        number_of_devices = int(info.get("deviceCount") or 0)
         if self.input_device > number_of_devices:
             raise DeviceNotFoundException(
                 f"Input device doesn't exist - {self.input_device}"
@@ -85,18 +92,24 @@ class AudioManager:
                 f"Output device doesn't exist - {self.output_device}"
             )
         if (
-            self.audio.get_device_info_by_host_api_device_index(
-                0, self.input_device
-            ).get("maxInputChannels")
+            int(
+                self.audio.get_device_info_by_host_api_device_index(
+                    0, self.input_device
+                ).get("maxInputChannels")
+                or 0
+            )
             < 1
         ):
             raise InvalidDeviceChannelsException(
                 "Input device has no input channels"
             )
         if (
-            self.audio.get_device_info_by_host_api_device_index(
-                0, self.output_device
-            ).get("maxOutputChannels")
+            int(
+                self.audio.get_device_info_by_host_api_device_index(
+                    0, self.output_device
+                ).get("maxOutputChannels")
+                or 0
+            )
             < 1
         ):
             raise InvalidDeviceChannelsException(
@@ -114,7 +127,7 @@ class AudioManager:
     def stop(self) -> None:
         if self.running:
             self.running = False
-            if self.loop and not self.loop.is_closed():
+            if self.loop and self.queue and not self.loop.is_closed():
                 asyncio.run_coroutine_threadsafe(
                     self.queue.put(None), self.loop
                 )
@@ -123,6 +136,8 @@ class AudioManager:
         asyncio.set_event_loop(self.loop)
 
         async def run_tasks() -> None:
+            if self.queue is None:
+                raise TongueTwisterException("Queue not initialised")
             async with Recorder(
                 self.queue, self.audio, self.input_device
             ) as recorder:
@@ -135,11 +150,12 @@ class AudioManager:
                     await asyncio.gather(recorder.run(), player.run())
 
         try:
-            self.loop.run_until_complete(run_tasks())
+            if self.loop:
+                self.loop.run_until_complete(run_tasks())
+            else:
+                raise TongueTwisterException("Loop not initialised")
         except asyncio.CancelledError:
             pass
-        except Exception as e:
-            print(f"ERROR (AudioManager): {e}")
         finally:
             if self.loop and not self.loop.is_closed():
                 tasks = asyncio.all_tasks(loop=self.loop)
